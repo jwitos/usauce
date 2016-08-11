@@ -123,32 +123,73 @@ function usosGetScores(req,res,next){
 
           var $ = cheerio.load(body);
           var scoresTable = $('.grey'); // Scrape table with scores
+          var semesterName;
+          var scoresArr;
+          var fullScoresArr = [];
 
           scoresTable.children('tbody').each(function(i, elem){
             if(i%2==0) {
               // Header - Semester (f.ex. winter/summer/academic year)
-              console.log("Header, i:",i);
-              let semesterName = elem.children[1].children[1].children[0].data; // tbody.tr.td.text.data - Semester name
-              console.log(semesterName);
-              res.write(semesterName);
+              //console.log("Header, i:",i);
+              semesterName = (elem.children[1].children[1].children[0].data).trim(); // tbody.tr.td.text.data - Semester name
+              //console.log(semesterName);
+              //res.write(semesterName);
             }
             else {
               // Here are the actual scores for the semester stated above
               // Each tr contains subject with its' scores
-              console.log("Scores, i:",i);
+
+              //console.log("Scores, i:",i);
+
+              scoresArr = [];
 
               // BELOW: get full scores text
               //var scoresElem = $('.grey').text()
               // END
 
               //res.write(scoresElem);
-              console.log("SUBJECT: ");
-              $(this).children('tr').each(function(i, elem) {
-                console.log($(this).text());
-                console.log("TD: ");
-                $(this).children('td').each(function(i, elem) {
-                  console.log("elem: ", $(this).text());
+
+              var tempSubject, tempScore, subjectName, subjectCode;
+              var tempPair = {};
+              var subjectsCount = $(this).children('tr').length;
+
+              $(this).children('tr').each(function(r, elem) {
+                var subjectScore = "";
+                //console.log("TR: ", $(this).text());
+                $(this).children('td').each(function(d, elem) {
+
+                  if(d==0) { // subject
+                    tempSubject = $(this).text();
+                    var tempSubjectSplitArray = tempSubject.split("\n");
+                    var _s = 0;
+                    tempSubjectSplitArray.forEach(function(s) {
+                      if(_s==1) {
+                        subjectName = s.trim();
+                      } else if (_s==2) {
+                        subjectCode = s.trim();
+                      }
+                      _s++;
+                    });
+                  } else if(d==2) { // score
+                    tempScore = $(this).text();
+                    var tempScoreSplitArray = tempScore.split("\n");
+                    if(tempScoreSplitArray.length > 1) {
+                      tempScoreSplitArray.forEach(function(s) {
+                        if(s.trim().length > 0) {
+                          subjectScore = subjectScore + " " + s.trim();
+                        }
+                      });
+                    }
+                  }
                 });
+                  var tempPair = { name: subjectName, code: subjectCode, score: subjectScore };
+                  //console.log(tempPair);
+                  scoresArr.push(tempPair);
+
+                  if(r+1 == subjectsCount) {
+                    //console.log("KONIEC SPRAWDZANIA PRZEDMIOTOW");
+                    //console.log({ semester: semesterName, scores: scoresArr });
+                  }
               });
 
               //console.log($(this).children('tr').children('td').text());
@@ -168,7 +209,11 @@ function usosGetScores(req,res,next){
                 }
               }
             }
+            fullScoresArr.push(scoresArr);
           });
+
+          console.log(fullScoresArr);
+          res.send(fullScoresArr);
 
           var scoresTableTbody = scoresTable.find('tbody').length;
 
@@ -201,7 +246,7 @@ function usosLoginView(req,res,next) {
 };
 
 /**
-  * (middleware) Connect with USOS and display page after logging in
+  * Connect with USOS and display page after logging in
   * @param req
   * @param res
   * @param next
@@ -222,7 +267,7 @@ function usosLogin(req,res,next){
 };
 
 /**
-  * (middleware) Show home page
+  * Show home page
   * @param req
   * @param res
   * @param next
@@ -238,7 +283,7 @@ function usosHomeView(req,res,next){
 };
 
 /**
-  * (middleware) Register for optional subject (pol.: fakultet)
+  * Register for optional subject (pol.: fakultet)
   * !!! DEPRECATED
   * @param req
   * @param res
