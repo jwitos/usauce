@@ -23,14 +23,18 @@ function usosHomeView(req,res,next){
   } else {
     console.log(req.query);
   }
-  res.status(200).send('<a href="/login">Loguj</a><br /><a href="/oceny">Oceny</a><br/><a href="/fakultet">Rejestruj na testow fakultet</a>');
+  res.status(200).send('<a href="/login">Loguj</a><br /><a href="/oceny">Oceny</a><br/><a href="/grades/exams">egzaminy</a><br /><a href="/grades/exam">wyniki z egzaminu (1)</a>');
 };
 
 
 router.get('/login', a.usosLoginView);
 router.post('/login', a.usosLogin);
 
-router.get('/oceny', sc.usosGetScores);
+router.get('/oceny', a.ifLogged, sc.usosGetScores);
+router.get('/grades', a.ifLogged, sc.usosGetScores);
+
+router.get('/grades/exam', a.ifLogged, sc.usosGetGradeFromExam);
+
 router.get('/', usosHomeView);
 
 module.exports = router;

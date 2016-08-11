@@ -43,3 +43,19 @@ exports.usosLogin = function(req,res,next){
     }
   });
 };
+
+/**
+  * (middleware)
+  * Check if user is logged in (has PHPSESSID in session)
+  * If true - continue; else redirect to login page
+  * @param req
+  * @param res
+  * @param next
+  */
+exports.ifLogged = function(req,res,next) {
+  if(req.session.PHPSESSID){ 
+    next();
+  } else {
+    res.redirect('/login');
+  }
+}
