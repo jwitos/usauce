@@ -1,4 +1,4 @@
-#USAUCE
+# USAUCE
 USAUCE is a open-source SDK for USOS (Uniwersytecki System Obsługi Studiów) at Jagiellonian University. Based primarily on web-scraping, since the official USOS API at Jagiellonian University is, frankly, locked for third-party, preventing everyone from writing their own software.
 
 This toolset allows you to run USAUCE and easily access and manage user's information using Node.js.
