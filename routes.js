@@ -29,11 +29,13 @@ function usosHomeView(req,res,next){
 
 router.get('/login', a.usosLoginView);
 router.post('/login', a.usosLogin);
+router.post('/auth/login', a.usosApiLogin);
 
 router.get('/oceny', a.ifLogged, sc.usosGetScores);
-router.get('/grades', a.ifLogged, sc.usosGetScores);
+router.all('/grades', a.ifLogged, sc.usosGetScores);
 
-router.get('/grades/exam', a.ifLogged, sc.usosGetGradeFromExam);
+router.all('/grades/exam', a.ifLogged, sc.usosGetGradeFromExam);
+
 
 router.get('/', usosHomeView);
 
