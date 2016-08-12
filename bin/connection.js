@@ -6,6 +6,7 @@ var express = require('express');
 	cjar = request.jar();
 
 var _this = this;
+var urls = require('./urls');
 
 /**
   * Connect with USOS - this function is the heart of app, it handles all redirects
@@ -20,7 +21,7 @@ var _this = this;
 
 exports.usosConnect = function(username,password,cjar,callback) {
   // Go to login.uj.edu.pl - CAS auth page
-  request({url:'https://login.uj.edu.pl/login?service=https%3A%2F%2Fwww.usosweb.uj.edu.pl%2Fkontroler.php%3F_action%3Dlogowaniecas%2Findex&gateway=true&locale=pl', jar:cjar}, function(err,response,body){
+  request({url:urls.LOGIN_GATEWAY, jar:cjar}, function(err,response,body){
     var $ = cheerio.load(body);
     var usosBodyForm = $('#fm1');
     var usosBodylt = $('input[name=lt]');
@@ -28,7 +29,7 @@ exports.usosConnect = function(username,password,cjar,callback) {
     var loginAction = usosBodyForm[0].attribs.action;
     // Prepare to send login form
     var postOptions = {
-      url:('https://login.uj.edu.pl/login?service=https%3A%2F%2Fwww.usosweb.uj.edu.pl%2Fkontroler.php%3F_action%3Dlogowaniecas%2Findex&locale=pl'),
+      url:urls.LOGIN_FORM,
       followRedirect:false,
       //followAllRedirects:true,
       jar:cjar,
@@ -46,7 +47,7 @@ exports.usosConnect = function(username,password,cjar,callback) {
         url:response.headers.location,
         jar:cjar,
         followRedirect:false,
-        headers:{'Referer':'https://login.uj.edu.pl/login?service=https%3A%2F%2Fwww.usosweb.uj.edu.pl%2Fkontroler.php%3F_action%3Dlogowaniecas%2Findex&locale=pl'}
+        headers:{'Referer':urls.LOGIN_FORM}
       },function(err,response,body){
         // Go to CAS auth confirmation page
 
@@ -61,14 +62,14 @@ exports.usosConnect = function(username,password,cjar,callback) {
           url:response.headers.location,
           jar:cjar,
           followRedirect:false,
-          headers:{'Referer':'https://login.uj.edu.pl/login?service=https%3A%2F%2Fwww.usosweb.uj.edu.pl%2Fkontroler.php%3F_action%3Dlogowaniecas%2Findex&locale=pl'}
+          headers:{'Referer':urls.LOGIN_FORM}
         },function(err,response,body){
           // Now try to go home
           request({
-            url:'https://www.usosweb.uj.edu.pl/kontroler.php?_action=home/index',
+            url:urls.USOS_HOME,
             jar:cjar,
             followRedirect:false,
-            headers:{'Referer':'https://login.uj.edu.pl/login?service=https%3A%2F%2Fwww.usosweb.uj.edu.pl%2Fkontroler.php%3F_action%3Dlogowaniecas%2Findex&locale=pl',
+            headers:{'Referer':urls.LOGIN_FORM,
                     'connection':'keep-alive'}
           },function(err,response,body){
             // Teraz tutaj można zrobić wejścia na inne strony
@@ -90,7 +91,7 @@ exports.usosConnect = function(username,password,cjar,callback) {
   * @param callback
   */
 exports.usosSessId = function(cjar, loginCallback) {
-  var sessId = cjar._jar.store.idx['www.usosweb.uj.edu.pl']['/'].PHPSESSID;
+  var sessId = cjar._jar.store.idx[urls.HOST]['/'].PHPSESSID;
   // var sessId contains an object {key: PHPSESSID, value: (), domain: (), secure etc.}
   loginCallback(sessId.value); // to usosConnect
 }

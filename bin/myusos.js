@@ -24,7 +24,7 @@ exports.usosGetGroups = function(req,res,next) {
     year = "";
   }
 
-	request({
+  request({
       url: urls.GROUPS + year,
       jar: cjar
     }, function(err,response,body){

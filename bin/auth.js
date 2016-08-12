@@ -8,6 +8,22 @@ var express = require('express');
 var c = require('./connection');
 
 /**
+  * Login to USOS through our API and get access to other endpoints
+  * @param req
+  * @param res
+  * @param next
+  */
+exports.usosApiLogin = function(req,res,next) {
+  var connect = c.usosConnect(req.body.username, req.body.password, cjar, function(err,body,sessId){
+    if(err) {
+      res.json({err: "Error logging in"});
+    } else {
+      res.json({logged: true, sessid: sessId});
+    }
+  });
+};
+
+/**
   * Show USOS login form
   * @param req
   * @param res
@@ -41,22 +57,6 @@ exports.usosLogin = function(req,res,next){
       //res.send(body) // <- shows USOS homepage
       // check whether login succedeed?
       res.redirect('/');
-    }
-  });
-};
-
-/**
-  * Login to USOS through our API and get access to other endpoints
-  * @param req
-  * @param res
-  * @param next
-  */
-exports.usosApiLogin = function(req,res,next) {
-  var connect = c.usosConnect(req.body.username, req.body.password, cjar, function(err,body,sessId){
-    if(err) {
-      res.json({err: "Error logging in"});
-    } else {
-      res.json({logged: true, sessid: sessId});
     }
   });
 };
