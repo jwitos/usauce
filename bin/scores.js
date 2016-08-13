@@ -140,3 +140,48 @@ exports.usosGetGradeFromExam = function(req,res,next) {
 		res.json({ err: "Missing one or more parameters (required: exam_id, term_id)" });
 	}
 }
+
+
+/**
+  * Get user's tests
+  * @param req
+  * @param res
+  * @param next
+  */
+exports.usosGetTests = function(req,res,next) {
+	request({
+		url: urls.TESTS,
+		jar: cjar
+	}, function(err,response,body){
+		if(err) { res.json({err: err}); }
+		var $ = cheerio.load(body);
+
+		var subjects = [];
+		var tempSubject, subjectCode, subjectName, coordinator, term, testsId;
+		$('.grey').find("tr").each(function(i, v) {
+			var wez_id = $(this).attr("wez_id");
+			if((i+1) % 2 == 0){
+				$(this).find("td").each(function (k, t) {
+					if(k == 0) {
+						subjectCode = $(this).find(".note").text().trim();
+						$(this).find(".note").remove();
+						subjectName = $(this).text().trim();
+					} else if (k == 1) {
+						coordinator = $(this).find(".note").text().trim();
+					}
+				});
+				tempSubject = {
+					name: subjectName, 
+					code: subjectCode, 
+					term: term, 
+					coordinator: coordinator,
+					testsId: wez_id
+				};
+				subjects.push(tempSubject);
+			} else {
+				term = $(this).find(".note").text().trim();
+			}
+		});
+		res.json(subjects);
+	});
+}

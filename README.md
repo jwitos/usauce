@@ -11,12 +11,20 @@ Call this method with `username` and `password` POST-sent data, the same as used
 
 `/grades`
 
-No required parameters. Call to get JSON response with all scores (exams/final scores).
+No required parameters.
+Call to get JSON response with all scores (exams/final scores).
+
+`/tests`
+
+No required parameters.
+Returns JSON table of objects with user's tests (subject, its code, term, coordinator and unique ID).
 
 `/groups`
 
-Parameters: No required. Optional: `year` param (POST), used to change academic year to retrieve groups, ex. "2015". Response is JSON with all the subjects, their groups (name, code, group number).
+Parameters: No required. Optional: `year` param (POST), used to change academic year to retrieve groups, ex. "2015".
+Response is JSON with all the subjects, their groups (name, code, group number).
 
 `/groups/details/`
 
-Required parameters (POST): `zaj_cyk_id` (unique group ID), `gr_nr` (group number; not unique). JSON response provides information about subject name, tutors, coordinator, other students.
+Required parameters (POST): `zaj_cyk_id` (unique group ID), `gr_nr` (group number; not unique).
+JSON response provides information about subject name, tutors, coordinator, other students.
