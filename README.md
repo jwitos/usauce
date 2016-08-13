@@ -16,3 +16,7 @@ No required parameters. Call to get JSON response with all scores (exams/final s
 `/groups`
 
 Parameters: No required. Optional: `year` param (POST), used to change academic year to retrieve groups, ex. "2015". Response is JSON with all the subjects, their groups (name, code, group number).
+
+`/groups/details/`
+
+Required parameters (POST): `zaj_cyk_id` (unique group ID), `gr_nr` (group number; not unique). JSON response provides information about subject name, tutors, coordinator, other students.

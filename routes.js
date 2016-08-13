@@ -37,6 +37,13 @@ router.all('/grades', a.ifLogged, sc.usosGetScores);
 router.all('/grades/exam', a.ifLogged, sc.usosGetGradeFromExam);
 
 
+// router.get('/courses/user', cr.usosGetUserCourses); // w jakich grupach zajęciowych się jest
+
+// router.get('/grades/tests', sc.usosGetCoursesWithTests); // sprawdziany: wybór przedmiotu
+
+// router.get('/grades/tests/course', sc.usosGetGradesFromTestsByCourse); // sprawdziany: oceny dla danego przedmiotu
+
+
 router.get('/', usosHomeView);
 
 module.exports = router;

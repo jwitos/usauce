@@ -86,3 +86,67 @@ exports.usosGetGroups = function(req,res,next) {
       }
   });
 };
+
+/**
+  * Get user group's details - name, tutors, students
+  * Required API parameters: @param zaj_cyk_id; @param gr_nr (POST)
+  * @param req
+  * @param res
+  * @param next
+  */
+exports.usosGetGroupDetails = function(req, res, next) {
+  if((req.body.zaj_cyk_id != undefined) && (req.body.gr_nr != undefined)) {
+    request({
+      url: (urls.GROUP_DETAILS + "&zaj_cyk_id=" + req.body.zaj_cyk_id + "&gr_nr=" + req.body.gr_nr),
+      jar: cjar
+    },
+    function(err,response,body) {
+      if(err) { res.json({err: err}); }
+
+      var $ = cheerio.load(body);
+      var grd = $('.grey').get(1);
+
+      // group details table
+      var subjectName, subjectCode, tutorsArr, groupNote;
+      var rows = $(grd).find("tr").each(function(i, v){
+        if (i == 0) {
+          subjectName = $(this).find("a").text().trim();
+          subjectCode = $(this).find(".note").text().trim();
+        } else if (i == 4) {
+          tutorsArr = [];
+          var tutors = $(this).find("a").each(function(k, t) {
+            tutorsArr.push($(this).text().trim());
+          });
+        } else if (i == 5) {
+          groupNote = $(this).find("p").text().trim();
+        }
+      });
+
+      // students in group table
+      var studentsArr = [];
+      var studentsRows = $('.wrnav').find("tr");
+      $(studentsRows).each(function(i, v) {
+        if(i>9 && i < (studentsRows.length - 2)) {
+          var objLastname = $(this).find("td").get(0);
+          var objFirstname = $(this).find("td").get(1);
+
+          var tempLastname = $(objLastname).text().trim();
+          var tempFirstname = $(objFirstname).text().trim();
+
+          studentsArr.push({l: tempLastname, f: tempFirstname});
+        }
+      });
+
+      res.json({
+        name: subjectName, 
+        code: subjectCode, 
+        tutors: tutorsArr, 
+        note: groupNote, 
+        students: studentsArr
+      });
+
+    });
+  } else {
+    res.json({err: "Missing required parameters. You need to POST: `zaj_cyk_id` and `gr_nr`."});
+  }
+}
