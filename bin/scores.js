@@ -6,6 +6,7 @@ var express = require('express');
 	cjar = request.jar();
 
 var urls = require('./urls');
+var tools = require('../helpers/tools');
 
 /**
   * Get user's scores from USOS
@@ -157,7 +158,7 @@ exports.usosGetTests = function(req,res,next) {
 		var $ = cheerio.load(body);
 
 		var subjects = [];
-		var tempSubject, subjectCode, subjectName, coordinator, term, testsId;
+		var tempSubject, subjectCode, subjectName, coordinator, term;
 		$('.grey').find("tr").each(function(i, v) {
 			var wez_id = $(this).attr("wez_id");
 			if((i+1) % 2 == 0){
@@ -175,7 +176,7 @@ exports.usosGetTests = function(req,res,next) {
 					code: subjectCode, 
 					term: term, 
 					coordinator: coordinator,
-					testsId: wez_id
+					wez_id: wez_id
 				};
 				subjects.push(tempSubject);
 			} else {
@@ -184,4 +185,77 @@ exports.usosGetTests = function(req,res,next) {
 		});
 		res.json(subjects);
 	});
+};
+
+/**
+  * Get test scores
+  * Required (POST): @param wez_id
+  * @param req
+  * @param res
+  * @param next
+  */
+exports.usosGetTestScores = function(req,res,next) {
+	if(req.body.wez_id != undefined) {
+		request({
+			url: urls.TEST_SCORES + "&wez_id=" + req.body.wez_id,
+			jar: cjar
+		}, function(err,response,body) {
+			if (err) { res.json({err: err}); }
+			var $ = cheerio.load(body);
+			var treeRootName = "childrenof" + req.body.wez_id;
+
+			var testTypes = [];
+			var tests = [];
+			var groupName, groupNote1, groupNote2;
+			// iterate through test groups (they are located in .grey tables)
+			$("#" + treeRootName).children(".grey").each(function(i, v) {
+				console.log("------ NEW TESTS GROUP ------");
+				var testGroup; 
+
+				// get test group's details
+				$(this).find("td").each(function(a, t) {
+					if(a==1) {
+						groupNote1 = tools.trimMultiline($(this).find(".note").text().trim());
+						$(this).find(".note").remove();
+						groupName = $(this).text().trim();
+					} else if (a==2) {
+						groupNote2 = $(this).text().trim();
+					}
+				});
+
+				// get specific tests
+				var scoresDiv = $(this).next();
+				var testsInGroup=[], testName, testScore, testNote;
+				$(scoresDiv).find(".grey").each(function(a, t) {
+					console.log("Scanning test in group number ", a);
+					// each test
+					$(this).remove(".footnote");
+					var testElements = $(this).find("td");
+
+					$(testElements).each(function(b, u) {
+						if(b==1) {
+							testName = tools.trimMultiline($(this).text().trim());
+						} else if (b==2) {
+							testScore = tools.trimMultiline($(this).text().trim());
+						} else if (b==3) {
+							testNote = tools.trimMultiline($(this).text().trim());
+						}
+
+						if(b+1 == testElements.length) {
+							testsInGroup.push({name: testName, score: testScore, note: testNote});
+						}
+					});
+				});
+				tests.push({
+					testGroupName: groupName,
+					testGroupNote1: groupNote1,
+					testGroupNote2: groupNote2,
+					testsInGroup: testsInGroup
+				})
+			});
+			res.json(tests);
+		});
+	} else {
+		res.json({err: "Missing `wez_id` parameter (POST)."});
+	}
 }

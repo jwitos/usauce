@@ -19,6 +19,11 @@ Call to get JSON response with all scores (exams/final scores).
 No required parameters.
 Returns JSON table of objects with user's tests (subject, its code, term, coordinator and unique ID).
 
+`/tests/scores`
+
+Requires (POST): `wez_id` (unique subject's tests ID).
+Returns JSON with all tests groups, notes and full scores for each test.
+
 `/groups`
 
 Parameters: No required. Optional: `year` param (POST), used to change academic year to retrieve groups, ex. "2015".
