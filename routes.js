@@ -38,6 +38,8 @@ router.all('/grades/exam', a.ifLogged, sc.usosGetGradeFromExam);
 router.all('/tests', a.ifLogged, sc.usosGetTests);
 router.post('/tests/scores', a.ifLogged, sc.usosGetTestScores);
 
+router.all('/completion', a.ifLogged, my.usosCompletion);
+
 router.all('/groups', a.ifLogged, my.usosGetGroups);
 router.all('/groups/details', a.ifLogged, my.usosGetGroupDetails);
 

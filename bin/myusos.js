@@ -149,4 +149,53 @@ exports.usosGetGroupDetails = function(req, res, next) {
   } else {
     res.json({err: "Missing required parameters. You need to POST: `zaj_cyk_id` and `gr_nr`."});
   }
+};
+
+
+/**
+  * Show user's completion report card
+  * @param req
+  * @param res
+  * @param next
+  */
+exports.usosCompletion = function(req,res,next) {
+  request({
+    url: urls.COMPLETION,
+    jar: cjar
+  }, function(err, response, body) {
+    if(err) { res.json({err: err}); }
+    var $ = cheerio.load(body);
+
+    var cycles = [];
+
+    var rows = $(".grey").find("tr");
+    $(rows).each(function(i, t) {
+      var name, cycle, completionDate, status, details;
+
+      $(this).find(".headnote").remove();
+      $(this).find(".footnote").remove();
+
+      
+      $(this).find("td").each(function(a, d) {
+        if (a == 0) {
+          name = $(this).text().trim();
+        } else if (a == 1) {
+          cycle = $(this).text().trim();
+        } else if (a == 2) {
+          completionDate = $(this).text().trim();
+        } else if (a == 3) {
+          status = $(this).text().trim();
+        }
+      });
+
+      cycles.push({
+        name: name, 
+        cycle: cycle, 
+        completionDate: completionDate, 
+        status: status
+      });
+    });
+
+    res.json(cycles);
+  });
 }
